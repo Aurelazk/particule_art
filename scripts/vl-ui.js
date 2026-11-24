@@ -1,6 +1,6 @@
 'use strict';
 /* VOIE LACTÉE — interface : DOM, panneaux, liste virtualisée, HUD, UX */
-import { esc, chapterProgress } from './vl-core.js';
+import { esc, chapterProgress, REDUCED } from './vl-core.js';
 
 const $ = id => document.getElementById(id);
 const $on = (id, fn) => { const e = $(id); if (e) e.onclick = fn };
