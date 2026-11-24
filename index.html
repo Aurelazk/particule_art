@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Voie Lactée — galerie de peintures en particules</title>
+<link rel="icon" href="data:,">
+<link rel="preload" as="fetch" href="artworks/manifest.json">
+<style>
+:root{--bg:#000;--fg:#f2f2f6;--mute:rgba(242,242,246,.66);--dim:rgba(242,242,246,.44);--acc:#c8d4ff;--serif:Georgia,'Times New Roman',serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+html{background:var(--bg);scroll-behavior:auto}
+body::before,body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:2}
+body::before{background:radial-gradient(ellipse at 50% 46%,transparent 38%,rgba(0,0,0,.34) 76%,rgba(0,0,0,.72) 100%)}
+body::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");opacity:.5;mix-blend-mode:screen}
+#bar{box-shadow:0 0 14px var(--acc)}
+body{margin:0;background:var(--bg);color:var(--fg);font:12px/1.6 var(--mono);letter-spacing:.1em;text-transform:uppercase;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;letter-spacing:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer;padding:8px 0;color:var(--mute);border-bottom:1px solid transparent;position:relative;transition:color .25s,letter-spacing .25s}
+button::after{content:'';position:absolute;left:0;right:100%;bottom:2px;height:1px;background:var(--acc);transition:right .32s cubic-bezier(.2,.8,.2,1)}
+button:hover,button:focus-visible,button[aria-pressed="true"]{color:var(--fg);border-bottom-color:transparent;letter-spacing:.13em}
+button:hover::after,button:focus-visible::after,button[aria-pressed="true"]::after{right:0}
+button:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+button:disabled{opacity:.58;cursor:not-allowed}
+a{color:var(--acc);text-decoration:none;border-bottom:1px solid var(--dim)}
+a:hover{border-color:var(--acc)}
+canvas#gl{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0;touch-action:pan-y;cursor:grab}
+canvas#gl:focus-visible{outline:2px solid var(--acc);outline-offset:-3px}
+body.dragging canvas#gl{cursor:grabbing}
+body.free canvas#gl{touch-action:none}
+canvas#hud{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:1;pointer-events:none}
+#spacer{position:relative;height:300vh;pointer-events:none;z-index:-1}
+.ui{position:fixed;z-index:5}
+#top{top:calc(env(safe-area-inset-top,0px) + 16px);left:calc(env(safe-area-inset-left,0px) + 20px);right:calc(env(safe-area-inset-right,0px) + 20px);display:flex;justify-content:space-between;align-items:flex-start;gap:16px;pointer-events:none}
+#top>*{pointer-events:auto}
+.brand{font-size:13px;letter-spacing:.3em}
+.brand small{display:block;font-size:10px;color:var(--mute);letter-spacing:.16em;margin-top:2px}
+#tools{display:flex;flex-wrap:wrap;gap:4px 16px;justify-content:flex-end;max-width:70vw}
+#tools button{font-size:10px}
+#bar{position:fixed;top:0;left:0;height:2px;width:0;background:var(--acc);z-index:9;pointer-events:none}
+#progress{position:fixed;right:calc(env(safe-area-inset-right,0px) + 20px);top:50%;transform:translateY(-50%);z-index:5;display:flex;flex-direction:column;gap:7px;align-items:flex-end;max-height:74vh;overflow-y:auto;padding-right:4px;scrollbar-width:none}
+#progress::-webkit-scrollbar{display:none}
+#progress button{font-size:9px;line-height:1.2;letter-spacing:.08em;padding:2px 0;border:0;color:var(--dim);flex:none}
+#progress button.on{color:var(--acc)}
+#progress button.on::after{content:'●';font-size:6px;margin-left:6px;vertical-align:middle}
+#progress .actSep{font:400 9px/1.2 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--acc);margin:10px 0 2px;opacity:.75;flex:none}
+#actTitle{position:fixed;left:50%;top:16%;transform:translateX(-50%);z-index:6;text-align:center;pointer-events:none;opacity:0;transition:opacity .55s;text-shadow:0 2px 26px #000,0 3px 46px #000;width:min(90vw,760px)}
+#actTitle .num{font:400 10px/1 var(--mono);letter-spacing:.42em;color:var(--acc);text-transform:uppercase}
+#actTitle .title{font:italic 400 clamp(28px,5vw,62px)/1.12 var(--serif);margin:14px 0 8px;letter-spacing:0}
+#actTitle .emotion{font:400 12px/1.5 var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--mute)}
+#narrative{position:fixed;left:calc(env(safe-area-inset-left,0px) + 20px);bottom:calc(env(safe-area-inset-bottom,0px) + 76px);width:min(470px,calc(100vw - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px) - 40px));z-index:5;pointer-events:none;opacity:0;transition:opacity .35s;text-shadow:0 1px 12px #000,0 2px 24px #000}
+#narrative .meta{font-size:10px;color:var(--acc);letter-spacing:.22em;margin-bottom:9px}
+#narrative h2{font:italic 400 clamp(25px,3.2vw,40px)/1.16 var(--serif);text-transform:none;letter-spacing:0;margin:0 0 7px}
+#narrative .by{font:400 14px/1.45 var(--serif);text-transform:none;letter-spacing:.02em;color:var(--mute);margin-bottom:13px}
+#narrative p{font:400 17px/1.55 var(--serif);text-transform:none;letter-spacing:.005em;color:rgba(242,242,246,.92);margin:0;max-width:440px}
+#bottom{left:calc(env(safe-area-inset-left,0px) + 20px);right:calc(env(safe-area-inset-right,0px) + 20px);bottom:calc(env(safe-area-inset-bottom,0px) + 20px);display:flex;justify-content:space-between;align-items:flex-end;gap:18px;pointer-events:none}
+#bottom>*{pointer-events:auto}
+#hint{color:var(--mute);font-size:10px;letter-spacing:.08em;max-width:52vw}
+#readout{color:var(--mute);font-size:10px;text-align:right}
+#readout b{color:var(--fg);font-weight:400}
+.marker{position:fixed;z-index:3;pointer-events:none;white-space:nowrap;font-size:9px;letter-spacing:.12em;color:var(--fg);opacity:0;transition:opacity .25s;text-shadow:0 0 8px #000,0 0 16px #000}
+.marker i{font-style:normal;color:var(--acc)}
+#welcome{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 45%,rgba(20,24,44,.55),#000 62%);padding:24px;text-align:center;overflow-y:auto}
+#welcome .box{width:min(620px,100%)}
+#welcome .mark{font-size:10px;color:var(--acc);letter-spacing:.5em;margin-bottom:24px}
+#welcome h1{font:italic 400 clamp(34px,7vw,72px)/1 var(--serif);text-transform:none;letter-spacing:-.01em;margin:0 0 16px}
+#welcome p{font:400 15px/1.7 var(--serif);text-transform:none;letter-spacing:0;color:var(--mute);margin:0 auto 30px;max-width:470px}
+#drop{border:1px dashed rgba(238,238,242,.35);padding:34px 20px;border-radius:2px;transition:.2s;background:rgba(255,255,255,.015)}
+#drop.hot{border-color:var(--acc);background:rgba(185,200,255,.08)}
+#drop .big{font-size:13px;margin-bottom:8px}
+#drop .sub{font-size:10px;color:var(--mute);letter-spacing:.08em}
+#welcome .actions{display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:center;margin-top:26px}
+#welcome .actions button{font-size:10px}
+#loading{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:21;font-size:10px;color:var(--acc);letter-spacing:.3em;display:none;text-align:center}
+#loading i{display:block;height:2px;background:var(--acc);width:0;margin-top:10px;transition:width .2s}
+aside,#mapWrap,#credits{position:fixed;z-index:10;top:0;bottom:0;background:rgba(0,0,0,.86);backdrop-filter:blur(12px);overflow:auto;transition:transform .28s ease;box-shadow:0 0 60px #000}
+aside{right:0;width:min(360px,92vw);padding:calc(env(safe-area-inset-top,0px) + 66px) 20px calc(env(safe-area-inset-bottom,0px) + 40px);border-left:1px solid rgba(255,255,255,.12);transform:translateX(102%)}
+body.panel aside{transform:none}
+aside h3{font-weight:400;font-size:11px;color:var(--mute);margin:22px 0 8px;letter-spacing:.18em}
+aside h3:first-child{margin-top:0}
+.note{font:400 12px/1.55 var(--serif);text-transform:none;letter-spacing:0;color:var(--mute)}
+.row{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.row img{width:44px;height:44px;object-fit:cover;flex:none;border:1px solid var(--dim);background:#111}
+.row .info{flex:1;min-width:0}
+.row .info b{display:block;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px}
+.row .info span{color:var(--mute);font-size:9px}
+.row .ctrl{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:78px}
+.row .ctrl button{font-size:9px;border:0;padding:3px 2px}
+label.field{display:block;margin:9px 0;color:var(--mute);font-size:10px}
+label.field span{display:block;margin-bottom:3px}
+input[type=text],input[type=number],textarea,select{width:100%;background:#080808;border:1px solid rgba(255,255,255,.18);padding:7px 8px;font:11px/1.5 var(--mono);letter-spacing:.04em;text-transform:none;color:var(--fg)}
+textarea{resize:vertical;min-height:74px;font-family:var(--serif);font-size:13px;letter-spacing:0}
+input[type=range]{width:100%;accent-color:var(--acc)}
+select{max-width:100%}
+#mapWrap{left:0;width:min(680px,94vw);padding:calc(env(safe-area-inset-top,0px) + 62px) 18px 20px;border-right:1px solid rgba(255,255,255,.12);transform:translateX(-102%)}
+body.map #mapWrap{transform:none}
+#map{width:100%;height:min(66vh,560px);display:block;background:radial-gradient(circle at 50% 50%,#070914,#000 70%);border:1px solid rgba(255,255,255,.1);touch-action:none}
+#credits{left:0;width:min(680px,94vw);padding:calc(env(safe-area-inset-top,0px) + 62px) 22px 40px;border-right:1px solid rgba(255,255,255,.12);transform:translateX(-102%)}
+body.credits #credits{transform:none}
+#credits h2,#mapWrap h2{font-weight:400;font-size:11px;letter-spacing:.3em;margin:0 0 18px}
+.credit{border-top:1px solid rgba(255,255,255,.09);padding:11px 0;display:grid;grid-template-columns:1fr auto;gap:6px 14px}
+.credit b{font:italic 400 14px var(--serif);text-transform:none;letter-spacing:0}
+.credit span{color:var(--mute);font-size:9px}
+.credit a{font-size:9px}
+.close{position:fixed;top:calc(env(safe-area-inset-top,0px) + 16px);right:calc(env(safe-area-inset-right,0px) + 18px);font-size:20px;width:32px;height:32px;line-height:28px;text-align:center;border:1px solid var(--dim);border-radius:50%;background:rgba(0,0,0,.5)}
+.close:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+body.map .close,body.credits .close{right:auto;left:min(660px,92vw)}
+#toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 62px);transform:translateX(-50%);z-index:30;color:var(--acc);font-size:9px;letter-spacing:.18em;background:rgba(0,0,0,.72);padding:7px 12px;border:1px solid rgba(185,200,255,.2);opacity:0;transition:opacity .25s;pointer-events:none;text-align:center;max-width:90vw}
+body.hide .ui:not(#bar),body.hide .marker,body.hide aside,body.hide #mapWrap,body.hide #credits,body.hide .close{display:none}
+@media(pointer:coarse){button{padding:12px 4px;font-size:11px}#tools{gap:4px 12px}}
+@media(max-width:760px){#progress{display:none}#narrative{bottom:calc(env(safe-area-inset-bottom,0px) + 132px)}#hint{display:none}#readout{font-size:10px}#top{left:calc(env(safe-area-inset-left,0px) + 12px);right:calc(env(safe-area-inset-right,0px) + 12px)}#bottom{left:calc(env(safe-area-inset-left,0px) + 12px);right:calc(env(safe-area-inset-right,0px) + 12px)}.brand small{display:none}#tools{gap:4px 12px}#tools button{font-size:10px}}
+@media(prefers-reduced-motion:reduce){*{transition-duration:.001s!important;animation:none!important}html{scroll-behavior:auto}}
+.t0 #gl,.t0 #hud{display:none}
+</style>
+</head>
+<body>
+<canvas id="gl" role="application" tabindex="0" aria-label="Constellation interactive de peintures en particules"></canvas>
+<canvas id="hud" aria-hidden="true"></canvas>
+<div id="markers" aria-hidden="true"></div>
+<div id="bar"></div>
+<div id="spacer" aria-hidden="true"></div>
+<header class="ui" id="top">
+  <div class="brand">Voie Lactée<small>Galerie de peintures en particules</small></div>
+  <nav id="tools" aria-label="Outils">
+    <button id="btnMode" aria-pressed="false" title="Basculer visite / mode libre (F)">Mode libre</button>
+    <button id="btnRotL" title="Pivoter à gauche (, )">↺ Pivoter</button>
+    <button id="btnRotR" title="Pivoter à droite ( . )">Pivoter ↻</button>
+    <button id="btnSpin" aria-pressed="false" title="Rotation automatique (T)">Auto ↻ : off</button>
+    <button id="btnQuality" title="Qualité d’image (V)">Qualité : auto</button>
+    <button id="btnLayout" title="Changer la disposition (L)">Disposition : émotions</button>
+    <button id="btnMap" aria-pressed="false" title="Carte de la constellation (M)">Carte</button>
+    <button id="btnWorks" aria-pressed="false" title="Panneau des œuvres (G)">Œuvres</button>
+    <button id="btnAudio" disabled aria-pressed="false" title="Son d’ambiance (S)">Son : off</button>
+    <button id="btnCredits" title="Crédits (C)">Crédits</button>
+  </nav>
+</header>
+<div class="ui" id="progress" aria-label="Chapitres de la visite"></div>
+<div class="ui" id="actTitle" aria-live="polite"></div>
+<section class="ui" id="narrative" aria-live="polite">
+  <div class="meta" id="narMeta"></div>
+  <h2 id="narTitle"></h2>
+  <div class="by" id="narBy"></div>
+  <p id="narText"></p>
+</section>
+<footer class="ui" id="bottom">
+  <div id="hint">Défilement : visite · glisser : pivoter l’œuvre · double-clic : réinitialiser · M carte · H masquer · P HUD</div>
+  <div id="readout"><b id="fps">—</b> fps · <b id="pcount">0</b> particules · <span id="chap">00 / 00</span></div>
+</footer>
+<div id="welcome" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle">
+  <div class="box">
+    <div class="mark">✦ &nbsp; V O I E &nbsp; L A C T É E &nbsp; ✦</div>
+    <h1 id="welcomeTitle">Les peintures comme constellations</h1>
+    <p>Un vide noir, des milliers de points de lumière. Cent seize œuvres libres sont chargées. Défilez pour les visiter, glissez pour faire pivoter une toile, ou importez les vôtres.</p>
+    <div id="drop" tabindex="0" role="button" aria-label="Importer des images">
+      <div class="big">＋ Déposez vos images ici</div>
+      <div class="sub">116 œuvres chargées automatiquement · imports jusqu’à 150 images</div>
+    </div>
+    <div class="actions">
+      <button id="wImport">Importer des images</button>
+      <button id="wFolder">Importer un dossier (images + manifest.json)</button>
+      <button id="wLink">Ajouter par lien</button>
+      <button id="wStart" disabled>Entrer dans la galerie</button>
+    </div>
+    <p class="note" style="margin-top:24px;max-width:520px">N’utilisez que des œuvres du domaine public ou librement réutilisables. Un champ « droits » est prévu pour chaque œuvre. <a href="https://commons.wikimedia.org" target="_blank" rel="noopener">Wikimedia Commons</a> · <a href="https://openaccess-api.clevelandart.org" target="_blank" rel="noopener">Cleveland Open Access</a></p>
+  </div>
+</div>
+<div id="loading" aria-live="polite">Chargement<i></i></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<aside id="panel" aria-label="Panneau des œuvres" aria-hidden="true">
+  <h3>[ Œuvres ]</h3>
+  <p class="note">Glissez une ligne pour modifier l’ordre de visite.</p>
+  <label class="field"><span>Rechercher</span><input id="searchQ" type="text" placeholder="titre, artiste…"></label>
+  <label class="field"><span>Artiste</span><select id="filterArtist"><option value="">Tous</option></select></label>
+  <label class="field"><span>Émotion</span><select id="filterEmotion"><option value="">Toutes</option></select></label>
+  <label class="field"><span>Époque</span><select id="filterEra"><option value="">Toutes</option></select></label>
+  <div id="workList"></div>
+  <h3>Ajouter</h3>
+  <div style="display:flex;flex-wrap:wrap;gap:6px 16px">
+    <button id="pAdd">＋ Images</button><button id="pFolder">＋ Dossier</button><button id="pLink">＋ Lien</button>
+  </div>
+  <h3>Œuvre sélectionnée</h3>
+  <div id="editor"></div>
+  <h3>Exporter</h3>
+  <div style="display:flex;flex-wrap:wrap;gap:6px 16px">
+    <button id="exPng">PNG de la vue</button><button id="exSave">Sauvegarder le projet</button>
+    <button id="exLoad">Charger un projet</button><button id="exHtml">HTML autonome</button>
+  </div>
+  <h3>Avertissement</h3>
+  <p class="note">Seules les œuvres du domaine public ou sous licence libre doivent être publiées. Renseignez le champ « droits » et vérifiez la source avant diffusion.</p>
+</aside>
+<div id="mapWrap" aria-label="Carte de la constellation" aria-hidden="true">
+  <h2>[ Carte de la constellation ]</h2>
+  <canvas id="map" tabindex="0" aria-label="Carte vue de dessus. Cliquez sur une œuvre pour y voler."></canvas>
+  <p class="note" style="margin-top:12px">Cliquez sur un repère pour voler vers l’œuvre. M pour fermer.</p>
+</div>
+<div id="credits" aria-label="Crédits" aria-hidden="true">
+  <h2>[ Crédits ]</h2>
+  <div id="creditList"></div>
+  <p class="note" style="margin-top:20px">Images du domaine public / CC0. Vérifiez les conditions locales avant publication.</p>
+</div>
+<button class="close" id="closeOver" aria-label="Fermer" hidden>×</button>
+<input id="fileInput" type="file" accept="image/*" multiple hidden>
+<input id="folderInput" type="file" webkitdirectory directory multiple hidden>
+<input id="projectInput" type="file" accept="application/json,.json" hidden>
+<select id="audioFile" hidden aria-label="Piste audio importée"><option value="">Aucune piste importée</option></select>
+<input id="hiddenAudioFile" type="file" accept="audio/*" hidden>
+<script type="module" src="./scripts/vl-main.js" defer></script>
+</body>
+</html>

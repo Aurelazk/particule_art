@@ -1,0 +1,94 @@
+{
+  "version": "1.0",
+  "project": "Voie Lactée",
+  "referenceDevice": {
+    "cpu": "Celeron/Atom 2 cœurs",
+    "ram": "2-4 Go",
+    "gpu": "Intel HD 2012-2016 intégré ou rendu logiciel (SwiftShader/llvmpipe)",
+    "screen": "1366x768",
+    "network": "3G 1,6 Mbit/s, 150 ms latence",
+    "cpuSlowdown": "6x",
+    "saveData": "possible"
+  },
+  "tiers": {
+    "T0": {
+      "label": "Essentiel",
+      "webgl": false,
+      "particles": 0,
+      "dpr": 1,
+      "canvas2dPoints": 4000,
+      "memoryJs": 150,
+      "gpuTextures": 0,
+      "fpsTarget": 60,
+      "fpsFloor": 60,
+      "conditions": ["RAM < 2 Go", "pas de WebGL", "rendu logiciel détecté", "Save-Data"]
+    },
+    "T1": {
+      "label": "Léger",
+      "webgl": 1,
+      "particles": [15000, 40000],
+      "dpr": 1,
+      "memoryJs": 150,
+      "gpuTextures": 64,
+      "fpsTarget": 30,
+      "fpsFloor": 30
+    },
+    "T2": {
+      "label": "Équilibré",
+      "webgl": 2,
+      "particles": [100000, 200000],
+      "dpr": 1.25,
+      "memoryJs": 300,
+      "gpuTextures": 128,
+      "fpsTarget": 60,
+      "fpsFloor": 30
+    },
+    "T3": {
+      "label": "Haute",
+      "webgl": 2,
+      "particles": [400000, 600000],
+      "dpr": 2,
+      "memoryJs": 500,
+      "gpuTextures": 256,
+      "fpsTarget": 60,
+      "fpsFloor": 30
+    }
+  },
+  "budgets": {
+    "initialLoadKb": 400,
+    "htmlCssJsGzKb": 150,
+    "preview384MaxKb": 25,
+    "microThumbMaxBytes": 600,
+    "firstArtworkVisibleMs": 4000,
+    "uiUsableMs": 2500,
+    "maxLongTaskMs": 50,
+    "maxLongTaskSlowCpuMs": 100,
+    "inpMs": 100,
+    "cls": 0,
+    "p95FrameMs": 20,
+    "memoryT0T1Mb": 150,
+    "memoryT2Mb": 300,
+    "memoryT3Mb": 500,
+    "stable5Min": true,
+    "longTasksDuringScroll": 0,
+    "renderWhenHidden": false,
+    "fpsIdle": [10, 15]
+  },
+  "assetRules": {
+    "previewsJsRemoved": true,
+    "previewFormat": ["webp", "avif"],
+    "previewWidthPx": 384,
+    "microThumbPx": "24-32",
+    "cacheNoStoreRemoved": true,
+    "hashNames": true,
+    "longCacheHeaders": true,
+    "preloadFirstArtwork": true,
+    "twoAheadPrefetch": true,
+    "cancelStaleRequests": true
+  },
+  "measurement": {
+    "headlessNote": "Rendu logiciel headless = pessimiste (pas de fps fiable). Confirmer sur vrai vieux PC, Android, iPhone, CPU ralenti 6x, réseau 4G.",
+    "hudKey": "P",
+    "tools": ["PerformanceObserver longtask/long-animation-frame", "DevTools Performance", "CDP CPU throttling 6x", "network 3G"]
+  }
+}
