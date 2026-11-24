@@ -117,8 +117,21 @@ export class AssetLoader {
     const job = this.uploadQueue[0];
     const gl = this.gl.gl;
     if (!gl) { this.uploading = false; return }
-    const v = this.gl.workVao.get(job.work);
-    if (!v) { this.uploadQueue.shift(); this.uploading = false; requestAnimationFrame(() => this.flushUploads()); return }
+    const work = job.work;
+    let v = this.gl.workVao.get(work);
+    const needLo = job.kind === 'lo' ? job.count : 0;
+    const needHi = job.kind === 'hi' ? job.count : 0;
+    if (!v) {
+      v = this.gl.ensureWork(work, needLo, needHi);
+    } else if (needLo * STRIDE * 4 > v.loBytes || needHi * STRIDE * 4 > v.hiBytes) {
+      const hadLo = v.loReady && work.loArr;
+      const hadHi = v.hiReady && work.hiArr;
+      const loCnt = v.loCount, hiCnt = v.hiCount;
+      v = this.gl.ensureWork(work, needLo, needHi);
+      gl.bindBuffer(gl.ARRAY_BUFFER, v.buf);
+      if (hadLo) gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Uint8Array(work.loArr.buffer, work.loArr.byteOffset, loCnt * STRIDE * 4));
+      if (hadHi) gl.bufferSubData(gl.ARRAY_BUFFER, v.loBytes, new Uint8Array(work.hiArr.buffer, work.hiArr.byteOffset, hiCnt * STRIDE * 4));
+    }
     gl.bindBuffer(gl.ARRAY_BUFFER, v.buf);
     const bytes = job.count * STRIDE * 4;
     const offset = job.kind === 'lo' ? 0 : v.loBytes;

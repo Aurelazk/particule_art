@@ -1,6 +1,6 @@
 'use strict';
 /* VOIE LACTÉE — export / import / sauvegarde */
-import { createWork } from './vl-core.js';
+import { createWork, buildStations, chapterProgress } from './vl-core.js';
 
 const $ = id => document.getElementById(id);
 const $text = (id, v) => { const e = $(id); if (e) e.textContent = v };
@@ -39,4 +39,3 @@ export class ExportKit {
 }
 function metaOf(w) { const keys = ['id', 'title', 'artist', 'year', 'museum', 'movement', 'rights', 'license', 'source', 'narrative', 'depthMode']; const o = {}; keys.forEach(k => o[k] = w[k]); return o }
 function clamp(v, a, b) { return Math.min(b, Math.max(a, v)) }
-function buildStations(ws, layout) { return [] } // stub; app rebuilds

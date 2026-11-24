@@ -175,10 +175,6 @@ export class GLRenderer{
     gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,16,0);
     gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,1,gl.FLOAT,false,16,12);
     gl.drawArrays(gl.POINTS,0,this.starN);
-    // lines
-    if(layerLines&&visibleWorks&&visibleWorks.length){
-      // lines buffer passed separately; caller sets bLines via setLines
-    }
     gl.useProgram(this.pProg);
     gl.uniformMatrix4fv(this.U.uVP,false,VP);
     gl.uniform3fv(this.U.uCam,new Float32Array(CAM));
