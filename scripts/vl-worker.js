@@ -70,7 +70,7 @@ self.onmessage = async e => {
   const d = e.data;
   if (d.type === 'prep') {
     try {
-      const img = await createImageBitmap(new Blob([d.imageBytes], { type: 'image/jpeg' }));
+      const img = await createImageBitmap(new Blob([d.imageBytes]));
       const px = prep(img, d.maxDim);
       img.close();
       const transfer = [px.L.buffer, px.H.buffer, px.NX.buffer, px.NY.buffer];

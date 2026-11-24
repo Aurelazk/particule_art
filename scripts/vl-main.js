@@ -73,6 +73,7 @@ async function boot() {
     await app.boot();
     $('wStart')?.removeAttribute('disabled');
     ui.initFilters();
+    if (app.tierResolved === 'T0') { showT0(); return }
     if (!app.gl || !app.gl.gl) { showT0(); return }
     const first = ordered(app.works)[0]; if (first) app.load.ensureLow(first);
     addEventListener('pointerdown', () => app.audio.arm(), { once: true });

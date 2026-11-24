@@ -142,7 +142,7 @@ export class AssetLoader {
     this.uploadQueue.shift();
     if (this.uploadQueue.length) { requestAnimationFrame(() => this.flushUploads()) } else { this.uploading = false }
   }
-  ensureLow(work) { if (work.loBuilt || work.loPending || !this.manifestLoaded) return; work.loPending = true; this.prepWork(work, 620).then(() => this.enqueueBuild(work, 'lo', 620, MOBILE ? 15000 : 2800)) }
+  ensureLow(work) { if (work.loBuilt || work.loPending || !this.manifestLoaded) return; work.loPending = true; this.prepWork(work, 620).then(() => this.enqueueBuild(work, 'lo', 620, MOBILE ? 15000 : 2800)).catch(() => { work.loPending = false }) }
   ensureHigh(work) { if (work.hiBuilt || work.hiPending || !work.px) return; work.hiPending = true; this.enqueueBuild(work, 'hi', 1000, MOBILE ? 220000 : 520000) }
 }
 const MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || innerWidth < 720;
