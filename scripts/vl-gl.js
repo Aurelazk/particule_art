@@ -160,7 +160,7 @@ export class GLRenderer{
     const gl=this.gl;const v=this.workVao.get(work);if(!v)return;
     const vao=this.createVAO();this.bindVAO(vao);
     gl.bindBuffer(gl.ARRAY_BUFFER,v.buf);
-    ATTRS.forEach(([n,s,o],i)=>{gl.enableVertexAttribArray(i);gl.vertexAttribPointer(i,s,gl.FALSE,STRIDE*4,o*4);});
+    ATTRS.forEach(([n,s,o],i)=>{gl.enableVertexAttribArray(i);gl.vertexAttribPointer(i,s,gl.FLOAT,gl.FALSE,STRIDE*4,o*4);});
     this.bindVAO(null);
     v.vao=vao;v.prog=program;
   }
