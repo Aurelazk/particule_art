@@ -1,0 +1,27 @@
+{
+  "timestamp": "2026-11-25T07:15:01.021Z",
+  "passed": true,
+  "errors": 0,
+  "warnings": 0,
+  "tiers": {
+    "T0": {
+      "errors": 0,
+      "warnings": 0
+    },
+    "T1": {
+      "errors": 0,
+      "warnings": 0
+    },
+    "T2": {
+      "errors": 0,
+      "warnings": 0
+    },
+    "T3": {
+      "errors": 0,
+      "warnings": 0
+    }
+  },
+  "chapters": 115,
+  "buttons": 16,
+  "note": "Headless software rendering is pessimistic. Confirm on real devices."
+}

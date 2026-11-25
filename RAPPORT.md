@@ -4,7 +4,7 @@
 
 | Indicateur | Avant | Après |
 |---|---:|---:|
-| Œuvres chargées | 69 | 116 |
+| Œuvres chargées | 69 | 115 |
 | Actes émotionnels | 0 | 10 |
 | Œuvres vérifiées Wikidata/Commons | — | 83 |
 | Dispositions | 4 | 5 (émotions par défaut) |
@@ -135,14 +135,12 @@ Les mesures de fluidité en navigateur headless logiciel ne sont pas représenta
 | 123-chariot-foin | Le Chariot de foin | X. Le Sublime | Le vertige | Lumières · Romantisme | vérifié |
 | 124-oxbow | The Oxbow | X. Le Sublime | Le vertige | Lumières · Romantisme | vérifié |
 | 125-sierra-nevada | Among the Sierra Nevada, California | X. Le Sublime | Le vertige | Modernité naissante | vérifié |
-| 126-averse-hiroshige | Averse soudaine sur le pont Shin-Ōhashi | X. Le Sublime | Le vertige | Modernité naissante | à confirmer |
-
 ## Optimisation performance — avant / après
 
 | Indicateur | Avant | Après | Budget (perf-budget.json) |
 |---|---:|---:|---:|
 | previews.js | 35,8 Mo | supprimé | 0 |
-| Aperçus (116 × 384 px WebP) | 35,8 Mo (base64) | 2,1 Mo | ≤ 25 Ko / aperçu |
+| Aperçus (115 × 384 px WebP) | 35,8 Mo (base64) | 2,1 Mo | ≤ 25 Ko / aperçu |
 | Mini-vignette embarquée par œuvre | — | ~450 octets (data URI) | ≤ 600 octets |
 | manifest.json | 176 Ko | 170 Ko (35 Ko gzip) | allégé, Brotli/gzip |
 | index.html | 225 Ko | 20 Ko (5,6 Ko gzip) | — |
@@ -168,4 +166,19 @@ Les mesures de fluidité en navigateur headless logiciel ne sont pas représenta
 - Mesures "avant" : navigateur sans GPU, CPU ralenti 6× (17 tâches longues, 20,4 s de blocage, 0,2 img/s au scroll).
 - Les mesures headless en rendu logiciel sont pessimistes et ne donnent pas de fps fiables ; elles doivent être confirmées sur de vrais appareils (vieux PC, Android d'entrée de gamme, iPhone, CPU ralenti 6×, réseau 4G).
 - Zéro erreur console, zéro valeur NaN dans les uniforms après la réécriture.
+- 115 œuvres après déduplication (126-averse-hiroshige retiré, doublon de 64-shower).
+- test-render.cjs : test automatisé de rendu (T0-T3, 1366×768 et 390×844, parcours des 115 chapitres, modes libre/carte/import/export/son, captures dans /reports). Le rendu logiciel headless est pessimiste.
+
+## Tests de rendu (test-render.cjs)
+
+Le script `test-render.cjs` vérifie :
+- Zéro erreur et zéro avertissement console
+- Boucle de rendu active (≥ 30 appels de dessin/seconde)
+- Pas d'écran vide (taux de pixels non noirs > seuil)
+- Nombre de particules ≥ minimum du niveau (T1: 15 000, T2: 100 000, T3: 400 000)
+- Navigation des 115 chapitres sans erreur
+- Bascule T0→T1→T2→T3 sans erreur
+- Tous les boutons de l'interface sans erreur
+
+Exécution : `node test-render.cjs` (nécessite Chrome/Chromium headless + serveur HTTP local sur le port 18080).
 
