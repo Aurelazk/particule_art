@@ -4,7 +4,7 @@
  "version": 3,
  "generatedAt": "2026-11-22T23:36:19.240Z",
  "notice": "Uniquement des œuvres du domaine public ou CC0. Vérifiez les droits locaux avant publication.",
- "count": 116,
+ "count": 115,
  "acts": [
   {
    "id": "01-sacre",
@@ -3307,34 +3307,6 @@
    "verified": true,
    "prevAvif": "artworks/previews/125-sierra-nevada.e7604549.avif",
    "prevAvifBytes": 13081
-  },
-  {
-   "id": "126-averse-hiroshige",
-   "filename": "126-averse-hiroshige.jpg",
-   "title": "Averse soudaine sur le pont Shin-Ōhashi",
-   "artist": "Utagawa Hiroshige",
-   "year": "1857",
-   "museum": "Metropolitan Museum of Art",
-   "act": "10-sublime",
-   "actTitle": "X. Le Sublime",
-   "emotion": "Le vertige",
-   "color": "#9fb6c4",
-   "era": "Modernité naissante",
-   "order": 11,
-   "detailFocus": "ciel",
-   "width": 3840,
-   "height": 5818,
-   "narrative": "Sous une pluie oblique, des passants franchissent un pont sur le Sumida. Hiroshige transforme un abri de fortune en un instant de vie suspendu.",
-   "story": "Sous une pluie oblique, des passants franchissent un pont sur le Sumida. Hiroshige transforme un abri de fortune en un instant de vie suspendu.",
-   "license": "Public domain",
-   "source": "https://commons.wikimedia.org/wiki/File:Hiroshige,_Sudden_shower_over_Shin-%C5%8Chashi_bridge_and_Atake,_1857.jpg",
-   "credit": "Utagawa Hiroshige",
-   "thumb": "data:image/jpeg;base64,/9j/2wBDABcQERQRDhcUEhQaGBcbIjklIh8fIkYyNSk5UkhXVVFIUE5bZoNvW2F8Yk5QcptzfIeLkpSSWG2grJ+OqoOPko3/2wBDARgaGiIeIkMlJUONXlBejY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY3/wAARCAAYABADASIAAhEBAxEB/8QAGAAAAgMAAAAAAAAAAAAAAAAAAAQCAwX/xAAeEAACAgMAAwEAAAAAAAAAAAABAgADBBESISIxUf/EABYBAQEBAAAAAAAAAAAAAAAAAAIAAf/EABkRAAMAAwAAAAAAAAAAAAAAAAABEQIhMf/aAAwDAQACEQMRAD8AqyezkP7sPMinWtdkmbFtVZY7UbizUUg7+SuMM3RfKzrFsZUQg/sTW2yx92FoQhSUE+n/2Q==",
-   "prev": "artworks/previews/126-averse-hiroshige.cad07dc0.webp",
-   "prevBytes": 18648,
-   "verified": false,
-   "prevAvif": "artworks/previews/126-averse-hiroshige.9290b1ab.avif",
-   "prevAvifBytes": 21805
   }
  ]
 }

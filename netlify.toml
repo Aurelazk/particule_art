@@ -3,10 +3,40 @@
   command = ""
 
 [[headers]]
-  for = "/*"
+  for = "/scripts/*"
   [headers.values]
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "no-referrer"
+    Content-Type = "application/javascript"
+
+[[headers]]
+  for = "/artworks/previews/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/artworks/hd/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Service-Worker-Allowed = "/"
+
+[[redirects]]
+  from = "/scripts/*"
+  to = "/scripts/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/artworks/*"
+  to = "/artworks/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/sw.js"
+  to = "/sw.js"
+  status = 200
 
 [[redirects]]
   from = "/*"
