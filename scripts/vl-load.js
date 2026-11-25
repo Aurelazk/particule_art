@@ -17,6 +17,7 @@ export class AssetLoader {
     this.uploadQueue = []; // {work, arr, count, kind}
     this.uploading = false;
     this.inflight = new Map(); // id -> promise/abort
+    this.prepPromise = new Map(); // id -> promise (dedupe concurrent prep)
     this.onProgress = onProgress;
     this.manifestLoaded = false;
     this.avif = false;
@@ -61,22 +62,27 @@ export class AssetLoader {
   }
   async prepWork(work, maxDim = 620) {
     if (this.px.has(work)) return this.px.get(work);
-    if (!work.imgBytes) await this.fetchImage(work);
-    if (!work.imgBytes) return null;
-    const wk = getWorker();
-    const transfer = [work.imgBytes];
-    const res = await new Promise((ok, rej) => {
-      const h = e => { if (e.data.id !== work.id) return; if (e.data.type === 'prepDone') ok(e.data); else if (e.data.type === 'prepError') rej(new Error(e.data.message)); wk.removeEventListener('message', h) };
-      wk.addEventListener('message', h);
-      wk.postMessage({ type: 'prep', id: work.id, imageBytes: work.imgBytes, maxDim }, transfer);
-      setTimeout(() => rej(new Error('prep timeout')), 30000);
-    });
-    work.imgBytes = null;
-    const px = { w: res.w, h: res.h, aspect: res.aspect, L: res.L, H: res.H, NX: res.NX, NY: res.NY, mask: res.mask, ch: res.ch, colorGain: res.colorGain, hue: res.hue, lum: res.lum, cropBox: res.cropBox };
-    work.px = px; work.aspect = res.aspect; work.hue = res.hue; work.lum = res.lum; work.cropBox = res.cropBox;
-    this.px.set(work, px);
-    this.onProgress(work.id, 'prep', work);
-    return px;
+    if (this.prepPromise.has(work.id)) return this.prepPromise.get(work.id);
+    const p = (async () => {
+      if (!work.imgBytes) await this.fetchImage(work);
+      if (!work.imgBytes) return null;
+      const wk = getWorker();
+      const transfer = [work.imgBytes];
+      const res = await new Promise((ok, rej) => {
+        const h = e => { if (e.data.id !== work.id) return; if (e.data.type === 'prepDone') ok(e.data); else if (e.data.type === 'prepError') rej(new Error(e.data.message)); wk.removeEventListener('message', h) };
+        wk.addEventListener('message', h);
+        wk.postMessage({ type: 'prep', id: work.id, imageBytes: work.imgBytes, maxDim }, transfer);
+        setTimeout(() => rej(new Error('prep timeout')), 30000);
+      });
+      work.imgBytes = null;
+      const px = { w: res.w, h: res.h, aspect: res.aspect, L: res.L, H: res.H, NX: res.NX, NY: res.NY, mask: res.mask, ch: res.ch, colorGain: res.colorGain, hue: res.hue, lum: res.lum, cropBox: res.cropBox };
+      work.px = px; work.aspect = res.aspect; work.hue = res.hue; work.lum = res.lum; work.cropBox = res.cropBox;
+      this.px.set(work, px);
+      this.onProgress(work.id, 'prep', work);
+      return px;
+    })();
+    this.prepPromise.set(work.id, p);
+    try { return await p } finally { this.prepPromise.delete(work.id) }
   }
   enqueueBuild(work, kind, maxDim, target) {
     const job = { work, kind, maxDim, target };

@@ -77,7 +77,7 @@ async function boot() {
     if (!app.gl || !app.gl.gl) { showT0(); return }
     const first = ordered(app.works)[0]; if (first) app.load.ensureLow(first);
     addEventListener('pointerdown', () => app.audio.arm(), { once: true });
-    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./scripts/vl-sw.js', { scope: './' }).catch(() => {}) }
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js', { scope: '/' }).catch(() => {}) }
     ui.toast(app.works.length + ' œuvres · défilez pour visiter');
   } catch (e) { console.error(e); ui.toast('Erreur de démarrage') }
 }

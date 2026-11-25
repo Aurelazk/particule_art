@@ -2,7 +2,7 @@
 /* VOIE LACTÉE — rendu WebGL (WebGL2 préféré, WebGL1 fallback)
    VAO, buffers préalloués, bufferSubData par morceaux, culling, LOD,
    cache textures LRU, perte de contexte, pause onglet caché. */
-import { clamp, fin, norm, sub, mul, mPerspective, mLookAt, mMul, MOBILE } from './vl-core.js';
+import { clamp, fin, norm, sub, mul, mPerspective, mLookAt, mMul, MOBILE, smoothstep } from './vl-core.js';
 
 const VS = `
 precision mediump float;

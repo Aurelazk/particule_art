@@ -153,6 +153,7 @@ export class App {
     const visible = this._cull(VP);
     const drawn = this.gl.drawFrame({ VP, CAM: this.cam, time: this.time, visibleWorks: visible, dpr: this.gl.DPR, pointScale: this.pointScale, reduced: REDUCED, debug: this.debug });
     if (this.onRedraw) this.onRedraw('frame', { drawn, visible: visible.length, cam: this.cam, target: this.target, chapter: this.chapter, fps: this.fps, p95: this.p95, tier: this.tierResolved })
+    if (!this.hidden && !this.paused) this.rafId = requestAnimationFrame(this._af)
   }
   _updateFocus(dt) { const list = ordered(this.works); list.forEach(w => { const d = Math.hypot(...sub(w.pos, this.cam)), near = frameDist(w) * 1.02, far = near * 2.6, target = 1 - smoothstep(near, far, d); w.focus += (target - w.focus) * (1 - Math.pow(0.00005, dt)) }) }
   _manageLoads() { const list = ordered(this.works); const idx = this.chapter >= 0 ? this.chapter : 0; for (let o = -2; o <= 2; o++) { const w = list[clamp(idx + o, 0, list.length - 1)]; if (w) this.load.ensureLow(w) } const close = list.slice().sort((a, b) => Math.hypot(...sub(a.pos, this.cam)) - Math.hypot(...sub(b.pos, this.cam))).slice(0, MOBILE ? 2 : 3); close.forEach(w => this.load.ensureHigh(w)) }
