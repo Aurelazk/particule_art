@@ -40,7 +40,7 @@ app.onRedraw = (kind, data) => {
     ui.drawHud({ fps: app.fps, p95: app.p95, tier: app.tierResolved, visible: data.visible, drawn: data.drawn, chapter: app.chapter });
   } else if (kind === 'chapter') { ui.renderChapters(); ui.actTitle(ordered(app.works)[data]) }
   else if (kind === 'panel') ui.togglePanel(data)
-  else if (kind === 'tier') { $text('btnQuality', 'Qualité : ' + { T0: 'essentiel', T1: 'léger', T2: 'équilibré', T3: 'haute' }[data] + ' · ' + data); localStorage.setItem('vl-tier', data) }
+  else if (kind === 'tier') { $text('btnQuality', 'Qualité : ' + { T0: 'essentiel', T1: 'léger', T2: 'équilibré', T3: 'haute' }[data] + ' · ' + data); localStorage.setItem('vl-tier', data); if (data === 'T0') showT0(); else exitT0() }
   else if (kind === 'mode') { $text('btnMode', data === 'free' ? 'Visite guidée' : 'Mode libre'); const bm = $('btnMode'); if (bm) bm.setAttribute('aria-pressed', data === 'free' ? 'true' : 'false') }
   else if (kind === 'select') { ui.renderEditor(); ui.renderWorksList() }
   else if (kind === 'fly') { ui.toast('Vol vers ' + data.title) }
@@ -84,11 +84,48 @@ async function boot() {
 boot();
 
 function showT0() {
-  document.body.classList.add('t0'); cv.style.display = 'none'; hud.style.display = 'none';
-  const list = $('workList'); if (!list) return;
-  list.innerHTML = '<p class="note">WebGL indisponible — galerie 2D de secours.</p>';
-  app.works.forEach(w => { const d = document.createElement('div'); d.className = 'row'; d.innerHTML = '<img src="' + esc(w.thumb || '') + '"><div class="info"><b>' + esc(w.title) + '</b><span>' + esc(w.artist) + '</span></div>'; d.onclick = () => { app.selectWork(w); ui.actTitle(w) }; list.appendChild(d) })
-  ui.toast('Mode essentiel (WebGL indisponible)')
+  document.body.classList.add('t0');
+  cv.style.display = 'none'; hud.style.display = 'none';
+  const t0Bar = $('t0Bar'); const t0Gallery = $('t0Gallery'); const t0Grid = $('t0Grid');
+  const t0Count = $('t0Count');
+  if (t0Bar) t0Bar.classList.add('visible');
+  if (t0Gallery) t0Gallery.classList.add('visible');
+  if (t0Count) t0Count.textContent = app.works.length + ' œuvres';
+  if (t0Grid) {
+    t0Grid.innerHTML = app.works.map((w, i) => {
+      const cls = (i === 0 ? 'selected' : '');
+      return '<div class="t0Card ' + cls + '" data-idx="' + i + '">' +
+        '<img src="' + esc(w.thumb || 'data:image/gif;base64,R0lGODlhAQABAAAAACw=') + '" alt="' + esc(w.title) + '">' +
+        '<div class="info"><b>' + esc(w.title) + '</b><span>' + esc(w.artist) + ' · ' + esc(w.year || '') + '</span><span>' + esc(w.actTitle || '') + ' · ' + esc(w.emotion || '') + '</span></div>' +
+        '</div>';
+    }).join('');
+    t0Grid.querySelectorAll('.t0Card').forEach((card, i) => {
+      card.onclick = () => {
+        t0Grid.querySelectorAll('.t0Card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        const w = app.works[i];
+        app.selectWork(w);
+        ui.actTitle(w);
+        if (app.onRedraw) app.onRedraw('select', w);
+      };
+    });
+  }
+  const t0Close = $('t0Close'); if (t0Close) t0Close.onclick = exitT0;
+  ui.toast('Mode essentiel (T0) · galerie 2D · 60 fps');
+}
+function exitT0() {
+  document.body.classList.remove('t0');
+  const t0Bar = $('t0Bar'); const t0Gallery = $('t0Gallery');
+  if (t0Bar) t0Bar.classList.remove('visible');
+  if (t0Gallery) t0Gallery.classList.remove('visible');
+  cv.style.display = 'block'; hud.style.display = 'block';
+  if (app.gl && app.gl.gl) {
+    app.gl.setHidden(false);
+    app.paused = false;
+    app.lastFrame = performance.now();
+    if (!app.rafId) requestAnimationFrame(app._af);
+  }
+  ui.toast('Mode WebGL réactivé');
 }
 
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) }

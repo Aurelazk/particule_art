@@ -111,6 +111,20 @@ body.hide .ui:not(#bar),body.hide .marker,body.hide aside,body.hide #mapWrap,bod
 @media(max-width:760px){#progress{display:none}#narrative{bottom:calc(env(safe-area-inset-bottom,0px) + 132px)}#hint{display:none}#readout{font-size:10px}#top{left:calc(env(safe-area-inset-left,0px) + 12px);right:calc(env(safe-area-inset-right,0px) + 12px)}#bottom{left:calc(env(safe-area-inset-left,0px) + 12px);right:calc(env(safe-area-inset-right,0px) + 12px)}.brand small{display:none}#tools{gap:4px 12px}#tools button{font-size:10px}}
 @media(prefers-reduced-motion:reduce){*{transition-duration:.001s!important;animation:none!important}html{scroll-behavior:auto}}
 .t0 #gl,.t0 #hud{display:none}
+#t0Gallery{position:fixed;inset:0;z-index:4;overflow:auto;background:#000;display:none;padding:20px}
+#t0Gallery.visible{display:block}
+#t0Grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;padding:10px}
+.t0Card{background:#0a0a0a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:8px;cursor:pointer;transition:transform .1s,border-color .1s}
+.t0Card:hover{border-color:#c8d4ff;transform:translateY(-2px)}
+.t0Card.selected{border-color:#c8d4ff;box-shadow:0 0 12px rgba(200,212,255,.3)}
+.t0Card img{width:100%;height:auto;display:block;border-radius:2px;background:#111}
+.t0Card .info{font:11px/1.3 var(--mono);letter-spacing:.08em;color:var(--mute);margin-top:6px}
+.t0Card .info b{color:var(--fg);font-weight:400;display:block;margin-bottom:2px}
+.t0Bar{position:fixed;top:0;left:0;right:0;height:40px;background:rgba(0,0,0,.9);z-index:4;display:flex;align-items:center;padding:0 20px;gap:16px;display:none}
+.t0Bar.visible{display:flex}
+.t0Bar .title{color:var(--fg);font:12px var(--mono);letter-spacing:.1em}
+.t0Bar .count{color:var(--mute);font-size:10px}
+.t0Bar button{font-size:10px;padding:4px 8px}
 </style>
 </head>
 <body>
@@ -119,6 +133,14 @@ body.hide .ui:not(#bar),body.hide .marker,body.hide aside,body.hide #mapWrap,bod
 <div id="markers" aria-hidden="true"></div>
 <div id="bar"></div>
 <div id="spacer" aria-hidden="true"></div>
+<div id="t0Bar" role="region" aria-label="Galerie essentielle">
+  <span class="title">Voie Lactée — Mode essentiel (T0)</span>
+  <span class="count" id="t0Count">0 œuvres</span>
+  <button id="t0Close" title="Quitter le mode essentiel">Fermer</button>
+</div>
+<div id="t0Gallery" role="region" aria-label="Galerie 2D des œuvres">
+  <div id="t0Grid"></div>
+</div>
 <header class="ui" id="top">
   <div class="brand">Voie Lactée<small>Galerie de peintures en particules</small></div>
   <nav id="tools" aria-label="Outils">
