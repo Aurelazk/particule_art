@@ -12,6 +12,9 @@ export class AssetLoader {
     this.works = [];
     this.byId = new Map();
     this.px = new Map(); // work -> px
+    this.hd = new Map(); // work -> hd image data (T2/T3 only)
+    this.hdQueue = []; // pending HD loads
+    this.hdLoading = new Set();
     this.buildQueue = [];
     this.building = new Set();
     this.uploadQueue = []; // {work, arr, count, kind}
@@ -21,6 +24,15 @@ export class AssetLoader {
     this.onProgress = onProgress;
     this.manifestLoaded = false;
     this.avif = false;
+    this.tier = 'T1';
+  }
+  setTier(tier) { this.tier = tier; }
+  particleCounts(kind) {
+    const m = MOBILE;
+    const base = { lo: m ? 8000 : 15000, hi: m ? 12000 : 25000 };
+    if (this.tier === 'T2') return { lo: m ? 25000 : 50000, hi: m ? 75000 : 150000 };
+    if (this.tier === 'T3') return { lo: m ? 50000 : 100000, hi: m ? 250000 : 500000 };
+    return base;
   }
   setAvifSupport(v){ this.avif = !!v; }
   static supportsAVIF(){
@@ -36,6 +48,7 @@ export class AssetLoader {
       const w = createWork({ id: a.id, title: a.title, artist: a.artist, year: a.year, museum: a.museum, act: a.act, actTitle: a.actTitle, emotion: a.emotion, color: a.color, era: a.era, order: a.order, narrative: a.narrative, story: a.story, rights: a.rights, license: a.license, source: a.source, credit: a.credit, width: a.width, height: a.height }, null, null);
       w.prev = a.prev; w.prevBytes = a.prevBytes || 0; w.thumb = a.thumb || '';
       w.filename = a.filename; w.detailFocus = a.detailFocus; w.verified = a.verified;
+      w.hdUrl = a.hd || '';
       if (a.width && a.height) { w.aspect = a.width / a.height; w.scale = 1.36 / Math.pow(Math.max(0.6, w.aspect), 0.3); w.radius = w.scale * Math.max(1, w.aspect) * 1.05 }
       return w;
     });
@@ -148,7 +161,21 @@ export class AssetLoader {
     this.uploadQueue.shift();
     if (this.uploadQueue.length) { requestAnimationFrame(() => this.flushUploads()) } else { this.uploading = false }
   }
-  ensureLow(work) { if (work.loBuilt || work.loPending || !this.manifestLoaded) return; work.loPending = true; this.prepWork(work, 620).then(() => this.enqueueBuild(work, 'lo', 620, MOBILE ? 15000 : 2800)).catch(() => { work.loPending = false }) }
-  ensureHigh(work) { if (work.hiBuilt || work.hiPending || !work.px) return; work.hiPending = true; this.enqueueBuild(work, 'hi', 1000, MOBILE ? 220000 : 520000) }
+  ensureLow(work) { if (work.loBuilt || work.loPending || !this.manifestLoaded) return; work.loPending = true; const c = this.particleCounts('lo'); this.prepWork(work, 620).then(() => this.enqueueBuild(work, 'lo', 620, c)).catch(() => { work.loPending = false }) }
+  ensureHigh(work) { if (work.hiBuilt || work.hiPending || !work.px) return; work.hiPending = true; const c = this.particleCounts('hi'); this.enqueueBuild(work, 'hi', 1000, c) }
+  async loadHD(work) {
+    if (this.hd.has(work.id) || this.hdLoading.has(work.id)) return;
+    if (!work.hdUrl) return;
+    this.hdLoading.add(work.id);
+    try {
+      const r = await fetch(work.hdUrl, { cache: 'force-cache' });
+      if (!r.ok) throw new Error('hd ' + r.status);
+      const ab = await r.arrayBuffer();
+      this.hd.set(work.id, ab);
+      this.onProgress(work.id, 'hd', work);
+    } catch (e) { /* HD optional, ignore errors */ }
+    finally { this.hdLoading.delete(work.id) }
+  }
+  releaseHD(work) { this.hd.delete(work.id) }
 }
 const MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || innerWidth < 720;

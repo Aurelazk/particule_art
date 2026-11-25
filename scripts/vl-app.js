@@ -86,6 +86,7 @@ export class App {
   }
   setTier(tier, initial = false) {
     this.tierResolved = tier;
+    this.load.setTier(tier);
     let dpr = 1, ps = 1;
     if (tier === 'T0') { dpr = 1; ps = 1 }
     else if (tier === 'T1') { dpr = 1; ps = 1 }
@@ -156,7 +157,7 @@ export class App {
     if (!this.hidden && !this.paused) this.rafId = requestAnimationFrame(this._af)
   }
   _updateFocus(dt) { const list = ordered(this.works); list.forEach(w => { const d = Math.hypot(...sub(w.pos, this.cam)), near = frameDist(w) * 1.02, far = near * 2.6, target = 1 - smoothstep(near, far, d); w.focus += (target - w.focus) * (1 - Math.pow(0.00005, dt)) }) }
-  _manageLoads() { const list = ordered(this.works); const idx = this.chapter >= 0 ? this.chapter : 0; for (let o = -2; o <= 2; o++) { const w = list[clamp(idx + o, 0, list.length - 1)]; if (w) this.load.ensureLow(w) } const close = list.slice().sort((a, b) => Math.hypot(...sub(a.pos, this.cam)) - Math.hypot(...sub(b.pos, this.cam))).slice(0, MOBILE ? 2 : 3); close.forEach(w => this.load.ensureHigh(w)) }
+  _manageLoads() { const list = ordered(this.works); const idx = this.chapter >= 0 ? this.chapter : 0; for (let o = -2; o <= 2; o++) { const w = list[clamp(idx + o, 0, list.length - 1)]; if (w) this.load.ensureLow(w) } const close = list.slice().sort((a, b) => Math.hypot(...sub(a.pos, this.cam)) - Math.hypot(...sub(b.pos, this.cam))).slice(0, MOBILE ? 2 : 3); close.forEach(w => this.load.ensureHigh(w)) if (this.tierResolved === 'T2' || this.tierResolved === 'T3') { for (let o = -2; o <= 2; o++) { const w = list[clamp(idx + o, 0, list.length - 1)]; if (w) this.load.loadHD(w) } } }
   _cull(VP) { const list = ordered(this.works); const maxD = this.tierResolved === 'T0' ? 0 : (this.tierResolved === 'T1' ? 45 : 70); const visible = []; for (const w of list) { const d = Math.hypot(w.pos[0] - this.cam[0], w.pos[1] - this.cam[1], w.pos[2] - this.cam[2]); if (d > maxD) continue; const p = mPoint(VP, w.pos); if (p[3] <= 0 || p[0] < -1.3 || p[0] > 1.3 || p[1] < -1.3 || p[1] > 1.3) continue; visible.push(w) } return visible }
   updateLines() { const list = ordered(this.works); const pts = []; const seen = new Set(); for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) { const a = list[i], b = list[j]; if (a.artist !== b.artist && (!a.movement || a.movement !== b.movement)) continue; const k = a.id + '/' + b.id; if (seen.has(k)) continue; seen.add(k); if (Math.hypot(...sub(a.pos, b.pos)) > 30) continue; pts.push(...a.pos, ...b.pos) } this.linesData = new Float32Array(pts); this.linesLen = pts.length / 3; this.gl.setLines(this.gl.bLines, this.linesData) }
   stop() { if (this.rafId) cancelAnimationFrame(this.rafId) }
