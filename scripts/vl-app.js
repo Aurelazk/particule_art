@@ -68,7 +68,7 @@ export class App {
   }
   async _microBench() {
     // Travail CPU fractionné : jamais de longue tâche > 8 ms sur le fil principal.
-    const targetWorkMs = 400;
+    const targetWorkMs = 150;
     const chunkMs = 6;
     let accMs = 0;
     const start = performance.now();
